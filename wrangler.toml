@@ -1,23 +1,24 @@
 name = "subscription-manager"
-main = "index.js"
-compatibility_date = "2024-01-01"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-[env.production]
-name = "subscription-manager"
+# 生产只通过受 Cloudflare Access 保护的自定义域访问。
+workers_dev = false
+preview_urls = false
 
-[env.staging]
-name = "subscription-manager-staging"
-
-# KV 命名空间配置
+# 复用现有生产 KV；v3 首次运行会幂等迁移旧数据。
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS_KV"
 id = "e48e8879a97a4e92834228fd80ba10e5"
 
-# 定时任务配置 - 每天早上8点检查
-[triggers]
-crons = ["0 8 * * *"]
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
-# 环境变量（可选，也可以在 Cloudflare Dashboard 中设置）
+# 每小时检查一次；实际发送小时由系统配置的时区与通知时段控制。
+[triggers]
+crons = ["0 * * * *"]
+
 [vars]
 ENVIRONMENT = "production"
